@@ -1,25 +1,63 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Fragment, useState, useRef } from "react";
 
-function App() {
+type FormElement = React.FormEvent<HTMLFormElement>;
+interface ITask {
+  name: string;
+  done: boolean;
+}
+
+function App(): JSX.Element {
+  const [newTask, setNewTask] = useState<string>("");
+  const [tasks, setTasks] = useState<ITask[]>([]);
+  const taskInput = useRef<HTMLInputElement>(null);
+
+  const handleSubmit = (e: FormElement) => {
+    e.preventDefault();
+    addTask(newTask);
+    setNewTask("");
+  };
+
+  const addTask = (name: string): void => {
+    const newTaks: ITask[] = [...tasks, { name, done: false }];
+    setTasks(newTaks);
+  };
+
+  const toggleDoneTask = (i: number): void => {
+    const newTasks: ITask[] = [...tasks];
+    newTasks[i].done = !newTasks[i].done;
+    setTasks(newTasks);
+  };
+
+  const removeTask = (i: number): void => {
+    const newTasks: ITask[] = [...tasks];
+    newTasks.splice(i, 1);
+    setTasks(newTasks);
+  };
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Fragment>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          onChange={e => setNewTask(e.target.value)}
+          value={newTask}
+          ref={taskInput}
+        />
+        <button>save</button>
+      </form>
+      {tasks.map((t: ITask, i: number) => (
+        <div key={i}>
+          <h2 style={{ textDecoration: t.done ? "line-through" : "" }}>
+            {t.name}
+          </h2>
+          <div>
+            <button onClick={() => toggleDoneTask(i)}>
+              {t.done ? "✓" : "✗"}
+            </button>
+            <button onClick={() => removeTask(i)}>🗑</button>
+          </div>
+        </div>
+      ))}
+    </Fragment>
   );
 }
 
